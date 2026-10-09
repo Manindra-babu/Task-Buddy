@@ -15,6 +15,19 @@ Its signature feature is **The Deadline Beacon** — a compact, luminous, animat
 
 ---
 
+## 📖 About TaskBuddy
+
+**TaskBuddy: The Deadline Beacon** is a productivity companion created for students, developers, and professionals who juggle multiple strict deadlines. Traditional to-do applications rely on intrusive banner notifications that get easily swiped away and forgotten. TaskBuddy introduces **The Deadline Beacon**: a persistent, non-intrusive luminous beacon that lives on your Windows desktop work area, giving you immediate, actionable control over your commitments without breaking your focus.
+
+### 💡 Why TaskBuddy?
+- **Multi-Stage Preparation**: Default reminder policy alerts you **2 days before** for preparation, **1 day before** for follow-up, and on **deadline day**.
+- **100% Offline & Private**: Built on local SQLite. No account registration, no subscriptions, and zero data leaves your PC.
+- **Ultra-Lightweight & Quiet**: Runs quietly in the Windows system tray with practically 0% idle CPU footprint.
+- **Action-Oriented Reminders**: Launch submission links directly in your default browser, mark tasks complete with one click, or snooze until tomorrow morning.
+- **Sleep & Restart Resilient**: If your computer is asleep or powered off when a deadline reminder is due, TaskBuddy automatically catches up and alerts you upon resume.
+
+---
+
 ## 📸 Key Features
 
 ### 1. 🚨 The Deadline Beacon

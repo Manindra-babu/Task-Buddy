@@ -1,7 +1,13 @@
 {
   "name": "taskbuddy",
   "version": "1.0.0",
-  "description": "TaskBuddy: Friendly 3D Desktop Deadline Companion for Windows",
+  "description": "TaskBuddy: The Deadline Beacon — High-precision Windows desktop deadline and reminder management system built with Electron, React, TypeScript, and SQLite.",
+  "author": "Manindra Babu",
+  "homepage": "https://github.com/Manindra-babu/Task-Buddy#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Manindra-babu/Task-Buddy.git"
+  },
   "main": "dist/electron/electron/main.js",
   "type": "commonjs",
   "scripts": {
