@@ -1,169 +1,187 @@
-# TaskBuddy 🚀
-### Friendly 3D Desktop Deadline Companion for Windows
+# TaskBuddy: The Deadline Beacon 🚨
+### High-Precision Windows Desktop Deadline Management System
 
-TaskBuddy is a complete, native Windows desktop application built with **Electron**, **React**, **TypeScript**, and **Three.js** that helps busy students manage online tests, hackathons, project reviews, presentations, academics, and personal responsibilities.
+[![Windows](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-blue?logo=windows)](https://microsoft.com)
+[![Electron](https://img.shields.io/badge/Framework-Electron%2035-47848F?logo=electron)](https://electronjs.org)
+[![React](https://img.shields.io/badge/UI-React%2018%20%2B%20TypeScript-61DAFB?logo=react)](https://react.dev)
+[![SQLite](https://img.shields.io/badge/Database-SQLite%20(Local)-003B57?logo=sqlite)](https://sqlite.org)
+[![Tests](https://img.shields.io/badge/Tests-33%20Passing-brightgreen?logo=vitest)](https://vitest.dev)
 
-Its defining feature is an animated 3D companion who gracefully appears at the bottom-right of the desktop when a deadline reminder is due, speaks the alert using **100% offline Windows text-to-speech (SAPI)**, and presents actionable options (**Start Task**, **Remind Me Later**, **Mark as Done**, **Dismiss**).
+**TaskBuddy: The Deadline Beacon** is a dedicated Windows desktop application built with **Electron**, **React**, **TypeScript**, and **SQLite**. It is designed specifically to help students, developers, and engineers never miss critical deadlines for online tests, hackathons, project reviews, presentations, college assignments, and personal commitments.
 
----
+Its signature feature is **The Deadline Beacon** — a compact, luminous, animated indicator that appears quietly at the bottom-right corner of your Windows desktop when a reminder is due. Clicking or hovering over the beacon expands it into a floating Windows 11 Fluent reminder card with actionable controls (**Start Task**, **Open Link**, **Snooze**, **Done**, and **Dismiss**).
 
-## 🌟 Key Features
-
-1. **Animated 3D Companion**:
-   - Rigged 3D companion model in GLB format with smooth skeletal animations (`Wave`, `Idle`, `Yes`, `Jump`, `No`).
-   - Automatically hidden when idle (0% CPU/GPU overhead).
-   - Appears at the bottom-right work area of your desktop without stealing keyboard focus (`showInactive`).
-   - Draggable character body with interactive, click-safe speech bubble action buttons.
-   - Companion model choice in Settings: Student 3D Rigged Boy or Expressive Robot Companion.
-
-2. **Offline Windows Text-to-Speech**:
-   - Uses local Windows `System.Speech.Synthesis` (SAPI) engine.
-   - Absolutely **zero internet or cloud dependency**.
-   - Configurable volume and speech rate.
-   - Graceful visual fallback when voice is disabled or unconfigured.
-
-3. **Persistent SQLite Database**:
-   - Versioned migrations (`database/database.ts`).
-   - Robust storage of tasks, reminder schedules, and user preferences in `%APPDATA%/taskbuddy/taskbuddy.sqlite`.
-   - Transactions, parameter binding, and atomic disk persistence.
-
-4. **Multi-Stage Reminder Scheduling & Policy**:
-   - **Default 2 Days Before (48h)** reminder for early preparation.
-   - **1 Day Before (24h)** follow-up reminder.
-   - **Deadline Day** final reminder.
-   - **Date-Only Tasks**: Defaults to 9:00 AM on the deadline date.
-   - **Quiet Hours**: Overnight (e.g., 22:00 to 07:00) suppression. Reminders hold quietly until quiet hours end.
-   - **Snooze Engine**: Re-schedules reminders for +15m or custom intervals.
-   - **Catch-Up & Recovery**: Detects missed reminders if the computer was offline or sleeping and presents an organized catch-up briefing without spamming duplicate alerts.
-
-5. **Windows Integration & System Tray**:
-   - Idempotent Windows auto-start on user sign-in (`app.setLoginItemSettings`).
-   - System Tray integration: Closing the main dashboard keeps TaskBuddy running quietly in the background.
-   - Tray context menu: Open Dashboard, Add Task, Character Preview, Pause/Resume Reminders, and Exit.
-   - Windows native toast notification fallback support.
-
-6. **Light Theme Visual Design**:
-   - Soft off-white and neutral surfaces with TaskBuddy blue (`#2563eb`) accents.
-   - Category color coding and priority badges (Low, Medium, High).
-   - Lucide icons with clear visual hierarchy.
+> **Distraction-Free Design**: TaskBuddy runs quietly in your Windows System Tray. It contains zero cartoon characters or heavy 3D game engines, consuming practically 0% CPU/GPU when idle.
 
 ---
 
-## 📁 Project Architecture
+## 📸 Key Features
 
-```
-To_do/
-├── assets/
-│   └── character/
-│       ├── character.glb         # Rigged 3D student model with animation clips
-│       └── robot.glb             # Alternative expressive companion model
-├── database/
-│   ├── database.ts               # SQLite engine (sql.js) with migrations & atomic write
-│   ├── schema.sql                # SQLite table definitions and indexes
-│   ├── task-repository.ts        # Task CRUD and state management
-│   ├── reminder-repository.ts    # Reminder scheduling & state queries
-│   └── settings-repository.ts    # Local user preferences persistence
-├── electron/
-│   ├── main.ts                   # App lifecycle, single-instance lock, scheduler bootstrap
-│   ├── preload.ts                # Strict typed contextBridge API
-│   ├── windows.ts                # Dashboard & transparent Character window manager
-│   ├── tray.ts                   # System tray icon and menu controls
-│   ├── startup.ts                # Windows login item registration
-│   └── ipc/                      # Validated IPC handlers
-│       ├── task-handlers.ts
-│       ├── reminder-handlers.ts
-│       └── settings-handlers.ts
-├── src/
-│   ├── character/
-│   │   ├── CharacterScene.tsx    # Three.js transparent renderer & animation mixer
-│   │   ├── CharacterWindow.tsx   # Floating window container & action dispatcher
-│   │   └── SpeechBubble.tsx      # Interactive speech bubble UI
-│   ├── dashboard/
-│   │   ├── components/           # Header, Sidebar, TaskCard, TaskModal, DailyBriefing
-│   │   └── pages/                # DashboardView, SettingsView, OnboardingModal
-│   ├── reminders/
-│   │   ├── policy.ts             # 2-day, 1-day, quiet hour & snooze rules
-│   │   ├── scheduler.ts          # Background timer & event dispatcher
-│   │   ├── recovery.ts           # Offline catch-up & startup reconciliation
-│   │   └── delivery.ts           # Payload & message generation
-│   ├── tasks/
-│   │   └── validation/           # Form validation & constraints
-│   ├── voice/
-│   │   └── voice-service.ts      # Offline Windows SAPI adapter
-│   ├── shared/
-│   │   ├── types.ts              # Shared TypeScript definitions
-│   │   ├── constants.ts          # Default settings and categories
-│   │   └── date-utils.ts         # Time math, quiet hour detection, friendly text
-│   ├── App.tsx                   # Hash router (Dashboard vs Character window)
-│   ├── main.tsx                  # React DOM entry point
-│   └── index.css                 # Clean light theme design system
-├── tests/
-│   ├── unit/                     # Validation, date math, policy, and database tests
-│   └── integration/              # Controllable clock scheduler tests
-├── package.json
-├── tsconfig.json
-└── vite.config.ts
+### 1. 🚨 The Deadline Beacon
+- **Zero Desktop Clutter**: Sits discreetly in the bottom-right corner of the Windows desktop work area, safely respecting the taskbar.
+- **Genuine Desktop Transparency**: Borderless, frameless, and transparent overlay with no background box or unwanted strips.
+- **Urgency Pulses**:
+  - 🔵 **Cobalt/Cyan**: Standard active deadline reminder
+  - 🟡 **Amber/Gold**: Approaching deadline signal
+  - 🔴 **Crimson/Red**: High-priority or overdue deadline
+  - 🟢 **Emerald/Green**: Subtle completion wave when a task is completed
+- **Full Keyboard Accessibility**: Press `Enter` to start the task or `Escape` to dismiss.
+
+### 2. ⚡ Actionable Reminder Controls
+- **Start Task**: Immediately opens the dashboard, focusing directly on the task.
+- **Open Link**: If you added a destination link (Devpost submission, Canvas assignment, GitHub repo, Google Meet), opens it directly in your default browser.
+- **Remind Me Later (Snooze)**:
+  - ⏱️ In 15 minutes
+  - ⏳ In 1 hour
+  - 🌅 Tomorrow morning (9:00 AM)
+- **Mark as Done**: Instantly completes the task, saves to local SQLite, cancels future alerts for this task, and triggers a subtle green celebration wave.
+- **Dismiss**: Closes the card cleanly without nagging.
+
+### 3. 📅 Multi-Stage Persistent Scheduling & Recovery
+- **Automatic Multi-Stage Alerts**:
+  - 📌 **2 days before** deadline (48 hours) for early preparation
+  - 📌 **1 day before** deadline (24 hours) follow-up
+  - 📌 **Deadline day** alert
+- **Date-Only Tasks**: Default to 9:00 AM on the deadline date (configurable in Settings).
+- **Sleep & Restart Recovery**: If your PC was asleep or turned off when a reminder was scheduled, TaskBuddy reconciles and surfaces missed reminders upon resume.
+- **Quiet Hours**: Overnight hours (default 22:00 to 07:00) suppression with user-configurable option to allow visual beacon signals while muting audio.
+
+### 4. 🔈 Offline Windows Speech (SAPI)
+- Uses built-in Windows `System.Speech.Synthesis` (SAPI).
+- **Muted by default** for quiet study and work sessions.
+- **100% Offline**: Zero external network or cloud dependencies.
+
+### 5. 🗄️ 100% Local SQLite Database
+- All tasks, categories, priorities, notes, next steps, and schedules are stored locally in:  
+  `%APPDATA%\TaskBuddy\taskbuddy.sqlite`
+- Completely private and offline. Your data stays on your machine.
+
+---
+
+## 🚀 Getting Started for You and Your Friends
+
+### Option 1: Run the Standalone App (No Coding Required)
+
+If you just want to run TaskBuddy on your Windows PC:
+1. Download or package the repository (see build instructions below).
+2. Open `release\win-unpacked\TaskBuddy.exe`.
+3. TaskBuddy will launch quietly in your **Windows System Tray** (look for the blue TaskBuddy icon near the clock in the bottom-right corner of your taskbar).
+4. Right-click the system tray icon and select **Open Dashboard** to add your tasks!
+
+---
+
+### Option 2: Run & Build From Source
+
+#### Prerequisites
+- Windows 10 or 11 (64-bit)
+- [Node.js](https://nodejs.org/) (version 18 or higher)
+- [Git](https://git-scm.com/)
+
+#### 1. Clone the Repository
+```bash
+git clone https://github.com/Manindra-babu/Task-Buddy.git
+cd Task-Buddy
 ```
 
----
-
-## 🛠️ Setup & Development
-
-### Prerequisites
-- Windows 10 or 11
-- Node.js v18+ (tested on Node v22.20)
-- npm v10+
-
-### Installation
-```powershell
+#### 2. Install Dependencies
+```bash
 npm install
 ```
 
-### Running Tests
-All 30 unit and integration tests run with controllable clocks (no waiting real days):
-```powershell
+#### 3. Run in Development Mode
+```bash
+npm run dev
+```
+This starts the Vite React dev server and launches Electron with live hot-reload.
+
+#### 4. Run Automated Tests
+```bash
 npm test
 ```
+Runs the full Vitest suite covering date utilities, form validation, reminder policies, SQLite migrations, and scheduler logic (33 / 33 tests passing).
 
-### Development Mode
-Launch Vite dev server and Electron simultaneously:
-```powershell
-npm run dev:app
-```
-
-### Production Build
-Build the React bundle and compile the Electron main process:
-```powershell
+#### 5. Build & Package Standalone Windows Executable
+```bash
+# 1. Compile React frontend and Electron main process
 npm run build
-```
 
-### Package Windows Executable
-Create the unpacked Windows desktop binary or NSIS installer:
-```powershell
-# Full Windows NSIS Setup Installer & Portable distribution
-npm run package
+# 2. Package into an unpacked Windows executable folder
+npx electron-builder --win --dir
 ```
-Generated artifacts in `release/`:
-- **`release/TaskBuddy-Setup-1.0.0.exe`**: Complete Windows NSIS Installer (99.3 MB) with custom installation directory, Start Menu, and Desktop shortcuts.
-- **`release/TaskBuddy-Setup-1.0.0.zip`**: Portable Windows distribution.
-- **`release/win-unpacked/TaskBuddy.exe`**: Ready-to-run standalone desktop binary.
+The compiled, runnable application is generated at:
+```
+release\win-unpacked\TaskBuddy.exe
+```
+You can zip the `release\win-unpacked` folder and share it directly with your friends!
 
 ---
 
-## 🧪 Automated Test Coverage
+## 🖥️ System Tray Controls
 
-The test suite covers:
-- **Task Validation**: Ensures required fields, category checks, title constraints, and deadline formatting.
-- **Date & Quiet Hours Math**: Verifies boundary calculations for overnight quiet hours (e.g. 22:00 to 07:00), daytime quiet hours, and remaining time strings.
-- **Reminder Policy**: Verifies 48-hour and 24-hour offsets, skipping impossible past alerts, and shifting quiet hour collisions to the morning wake boundary.
-- **SQLite Persistence**: Validates table creation, migrations, CRUD, and atomic file saves.
-- **Scheduler Integration**: Using a controllable test clock, validates task creation triggers, deduplication, snooze expiration, and missed reminder catch-up.
+| Tray Action | Description |
+| :--- | :--- |
+| **Double-Click Icon** | Opens the main TaskBuddy Dashboard |
+| **Open Dashboard** | Opens the task manager window |
+| **Add Task...** | Directly opens the new task modal |
+| **Test Deadline Beacon** | Triggers an instant sample Deadline Beacon overlay |
+| **Pause / Resume Reminders** | Temporarily pauses or resumes all background alerts |
+| **Exit TaskBuddy** | Cleanly closes SQLite database, scheduler, and exits |
 
 ---
 
-## 🔒 Security & Privacy
+## 📁 Repository Structure
 
-- **contextIsolation**: Enabled in all browser windows.
-- **nodeIntegration**: Disabled across all windows.
-- **Typed contextBridge**: A narrow, validated API is exposed in `preload.ts`.
-- **100% Offline**: All speech and task storage execute entirely on your machine. No telemetry, no external API keys, and no network requests.
+```
+Task-Buddy/
+├── database/
+│   ├── database.ts             # Local SQLite engine (sql.js) with versioned migrations
+│   ├── schema.sql              # Database schema and indexes
+│   ├── task-repository.ts      # Tasks CRUD, next actions, destination URLs
+│   ├── reminder-repository.ts  # Multi-stage scheduling, delivery, snooze queries
+│   └── settings-repository.ts  # User preferences persistence
+├── electron/
+│   ├── main.ts                 # Lifecycle, single-instance lock, tray setup, scheduler
+│   ├── preload.ts              # Secure typed contextBridge API
+│   ├── windows.ts              # Dashboard window & transparent Beacon window manager
+│   ├── tray.ts                 # Windows system tray integration & context menu
+│   ├── startup.ts              # Windows launch-on-boot integration
+│   └── ipc/                    # Type-safe IPC channels (tasks, reminders, settings)
+├── src/
+│   ├── beacon/
+│   │   ├── BeaconIndicator.tsx # Glowing status beacon with concentric pulse rings
+│   │   ├── ReminderCard.tsx    # Windows 11 floating reminder card with actions
+│   │   ├── BeaconWindow.tsx    # Transparent desktop overlay window orchestrator
+│   │   ├── BeaconPreviewStudio.tsx # Interactive testing studio
+│   │   └── animations.css      # Keyframes for pulse rings, card expansion, celebration
+│   ├── dashboard/
+│   │   ├── components/         # Header, Sidebar, TaskCard, TaskModal, DailyBriefing
+│   │   └── pages/              # DashboardView, SettingsView, OnboardingModal
+│   ├── reminders/
+│   │   ├── policy.ts           # 2-day, 1-day, quiet hours, and snooze logic
+│   │   ├── scheduler.ts        # 30-second background ticker & event dispatcher
+│   │   └── recovery.ts         # Sleep resume & PC startup reconciliation
+│   ├── tasks/validation/       # Task input validation & constraints
+│   ├── voice/                  # Offline Windows SAPI voice synthesizer
+│   ├── shared/                 # Common interfaces, constants, date helpers
+│   ├── App.tsx                 # View router (Dashboard, #beacon, #preview)
+│   └── index.css               # Clean styling & window transparency rules
+└── tests/
+    ├── unit/                   # Unit tests (validation, dates, policy, database)
+    └── integration/            # Scheduler integration & reconciliation tests
+```
+
+---
+
+## 🔒 Privacy & Local Security
+
+- **100% Local & Private**: No deadlines, titles, or notes are ever uploaded or transmitted across the internet.
+- **Secure Electron Configuration**: Context isolation enabled, Node.js integration disabled in renderer processes.
+- **SQL Injection Prevention**: Parameterized queries across all SQLite interactions.
+- **Safe Link Launching**: External URLs are validated (`http:` / `https:`) and launched via Windows shell without renderer privileges.
+
+---
+
+## 🤝 Contributing & Feedback
+Pull requests, feedback, and issue reports are welcome! Feel free to fork the repo, submit improvements, or open an issue on [GitHub](https://github.com/Manindra-babu/Task-Buddy).
+
+Enjoy staying ahead of your deadlines with **TaskBuddy**! 🚨

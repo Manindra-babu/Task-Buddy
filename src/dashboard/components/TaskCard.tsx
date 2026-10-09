@@ -117,12 +117,35 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             )}
           </div>
 
+          {/* Next action preview if any */}
+          {task.next_action && (
+            <div
+              style={{
+                marginTop: 8,
+                fontSize: 12,
+                color: '#334155',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                background: '#eff6ff',
+                padding: '4px 8px',
+                borderRadius: 6,
+                border: '1px solid #dbeafe',
+              }}
+            >
+              <span style={{ fontWeight: 600, color: '#1d4ed8' }}>Next step:</span>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {task.next_action}
+              </span>
+            </div>
+          )}
+
           {/* Notes preview if any */}
           {task.notes && (
             <div
               style={{
-                marginTop: 8,
-                fontSize: 13,
+                marginTop: 6,
+                fontSize: 12,
                 color: '#64748b',
                 display: 'flex',
                 alignItems: 'center',
@@ -136,6 +159,37 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {task.notes}
               </span>
+            </div>
+          )}
+
+          {/* Destination URL link */}
+          {task.destination_url && (
+            <div style={{ marginTop: 6 }}>
+              <button
+                type="button"
+                onClick={() => {
+                  if (task.destination_url && window.taskBuddy?.openExternalUrl) {
+                    window.taskBuddy.openExternalUrl(task.destination_url);
+                  } else if (task.destination_url) {
+                    window.open(task.destination_url, '_blank');
+                  }
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#2563eb',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  padding: 0,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  textDecoration: 'underline',
+                }}
+              >
+                <span>{task.destination_url}</span>
+              </button>
             </div>
           )}
         </div>

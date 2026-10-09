@@ -19,6 +19,8 @@ export interface Task {
   priority: TaskPriority;
   status: TaskStatus;
   notes: string | null;
+  next_action?: string | null;
+  destination_url?: string | null;
   created_at: string;
   updated_at: string;
   completed_at: string | null;
@@ -52,34 +54,44 @@ export interface Reminder {
   updated_at: string;
 }
 
+export type BeaconAnimationIntensity = 'subdued' | 'standard' | 'vibrant' | 'reduced';
+
 export interface AppSettings {
   defaultReminderTwoDay: boolean;
   defaultReminderOneDay: boolean;
   defaultReminderDeadlineDay: boolean;
   defaultDeadlineTime: string; // "09:00"
+  snoozeDefaultMinutes: number; // 15
   quietHoursEnabled: boolean;
   quietHoursStart: string; // "22:00"
   quietHoursEnd: string; // "07:00"
-  voiceEnabled: boolean;
+  quietHoursAllowVisual: boolean; // allow visual beacon popup in quiet hours, voice muted
+  voiceEnabled: boolean; // default false
   voiceVolume: number; // 0 to 1
   voiceRate: number; // 0.5 to 1.5
-  characterSize: 'normal' | 'large' | 'compact';
-  avatarModel: 'student' | 'robot';
+  beaconAnimationIntensity: BeaconAnimationIntensity;
+  notificationGrouping: boolean;
   startupEnabled: boolean;
   onboardingCompleted: boolean;
   lastReconciliationAt: string | null;
+  // Legacy optional properties
+  characterSize?: 'normal' | 'large' | 'compact';
+  avatarModel?: 'student' | 'robot';
 }
 
-export type CharacterAnimationState =
+export type BeaconState =
   | 'hidden'
   | 'entering'
-  | 'idle'
-  | 'speaking'
-  | 'pointing'
-  | 'celebrating'
+  | 'signal'
+  | 'expanding'
+  | 'expanded'
+  | 'snoozed'
   | 'dismissed'
+  | 'completing'
   | 'exiting'
   | 'error';
+
+export type CharacterAnimationState = BeaconState | 'idle' | 'greeting' | 'speaking' | 'celebrating' | 'pointing' | 'thinking' | 'alert' | 'listening' | 'sleeping';
 
 export interface ReminderEventPayload {
   reminder: Reminder;

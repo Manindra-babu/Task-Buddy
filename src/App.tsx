@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { DashboardView } from './dashboard/pages/DashboardView';
-import { CharacterWindow } from './character/CharacterWindow';
 import { ITaskBuddyAPI } from '../electron/preload';
 import { DEFAULT_SETTINGS } from './shared/constants';
 import { Task } from './shared/types';
@@ -122,6 +121,9 @@ function setupBrowserMockIfNecessary() {
   }
 }
 
+import { BeaconWindow } from './beacon/BeaconWindow';
+import { BeaconPreviewStudio } from './beacon/BeaconPreviewStudio';
+
 setupBrowserMockIfNecessary();
 
 export const App: React.FC = () => {
@@ -133,8 +135,20 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  if (hash === '#character') {
-    return <CharacterWindow />;
+  const isBeacon =
+    hash === '#beacon' ||
+    hash === '#character' ||
+    window.location.hash.includes('beacon') ||
+    window.location.hash.includes('character') ||
+    window.location.search.includes('beacon') ||
+    window.location.search.includes('character');
+
+  if (isBeacon) {
+    return <BeaconWindow />;
+  }
+
+  if (hash === '#preview') {
+    return <BeaconPreviewStudio />;
   }
 
   return <DashboardView />;

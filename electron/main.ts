@@ -1,4 +1,4 @@
-import { app, BrowserWindow, powerMonitor, Notification } from 'electron';
+import { app, BrowserWindow, powerMonitor, Notification, Menu } from 'electron';
 import path from 'path';
 import { TaskBuddyDatabase } from '../database/database';
 import { TaskRepository } from '../database/task-repository';
@@ -13,13 +13,14 @@ import { registerReminderHandlers } from './ipc/reminder-handlers';
 import { registerSettingsHandlers } from './ipc/settings-handlers';
 import { StartupManager } from './startup';
 
-const isDev = process.env.NODE_ENV !== 'production' && !app.isPackaged;
-const devServerUrl = 'http://localhost:5173/';
+const isDev = (process.env.NODE_ENV === 'development' || process.env.ELECTRON_DEV === 'true') && !app.isPackaged;
+const devServerUrl = process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173/';
 
 // Single instance lock
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
   app.quit();
+  process.exit(0);
 }
 
 let database: TaskBuddyDatabase;
@@ -34,8 +35,11 @@ let trayManager: TrayManager;
 async function bootstrap() {
   // Determine SQLite storage location in per-user AppData
   const dbPath = path.join(app.getPath('userData'), 'taskbuddy.sqlite');
+  const resourcesPath = (process as any).resourcesPath;
+  const wasmPath = resourcesPath ? path.join(resourcesPath, 'sql-wasm.wasm') : undefined;
+
   database = new TaskBuddyDatabase();
-  await database.init({ dbPath });
+  await database.init({ dbPath, wasmBinaryPath: wasmPath });
 
   taskRepo = new TaskRepository(database);
   reminderRepo = new ReminderRepository(database);
@@ -109,9 +113,14 @@ async function bootstrap() {
     scheduler.reconcile();
   });
 
-  // Check launch args (e.g. startup with --hidden)
-  const isHiddenLaunch = process.argv.includes('--hidden');
-  if (!isHiddenLaunch) {
+  // Remove default application menu so no unwanted white menu strip appears
+  Menu.setApplicationMenu(null);
+
+  // TaskBuddy is designed to be quiet by default, running via Windows system tray.
+  // The signature Deadline Beacon appears at the bottom-right when reminders are due.
+  // The dashboard window is only rendered when explicitly opened from the tray or beacon.
+  const isExplicitShow = process.argv.includes('--show-dashboard') || process.argv.includes('--show');
+  if (isExplicitShow) {
     windowManager.createMainWindow();
   }
 }
@@ -127,7 +136,19 @@ app.on('second-instance', () => {
   }
 });
 
-app.whenReady().then(bootstrap);
+app.whenReady().then(async () => {
+  try {
+    await bootstrap();
+  } catch (err: any) {
+    console.error('TaskBuddy bootstrap failed:', err);
+    try {
+      const { dialog } = require('electron');
+      dialog.showErrorBox('TaskBuddy Initialization Error', String(err?.stack || err?.message || err));
+    } catch {
+      // ignore dialog error
+    }
+  }
+});
 
 app.on('before-quit', () => {
   windowManager?.setQuitting(true);

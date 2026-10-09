@@ -7,6 +7,8 @@ export interface TaskInput {
   deadlineToTime?: string; // HH:mm
   priority: TaskPriority;
   notes?: string;
+  next_action?: string;
+  destination_url?: string;
 }
 
 export interface ValidationResult {
@@ -63,6 +65,24 @@ export function validateTaskInput(input: Partial<TaskInput>): ValidationResult {
   // Notes validation (optional)
   if (input.notes && input.notes.length > 2000) {
     errors.notes = 'Notes must be 2000 characters or less';
+  }
+
+  // Next action validation (optional)
+  if (input.next_action && input.next_action.length > 500) {
+    errors.next_action = 'Next action must be 500 characters or less';
+  }
+
+  // Destination URL validation (optional)
+  if (input.destination_url && input.destination_url.trim().length > 0) {
+    const trimmedUrl = input.destination_url.trim();
+    try {
+      const parsed = new URL(trimmedUrl);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        errors.destination_url = 'Destination URL must begin with http:// or https://';
+      }
+    } catch {
+      errors.destination_url = 'Please provide a valid URL (e.g. https://github.com)';
+    }
   }
 
   return {

@@ -27,6 +27,7 @@ export class WindowManager {
       return this.mainWindow;
     }
 
+    console.log('[WindowManager] Creating main window...');
     this.mainWindow = new BrowserWindow({
       width: 1180,
       height: 760,
@@ -34,25 +35,45 @@ export class WindowManager {
       minHeight: 600,
       title: 'TaskBuddy',
       backgroundColor: '#f8fafc',
+      autoHideMenuBar: true,
       show: false,
       webPreferences: {
         preload: path.join(__dirname, 'preload.js'),
         contextIsolation: true,
         nodeIntegration: false,
-        sandbox: true,
+        sandbox: false,
       },
     });
 
+    this.mainWindow.webContents.on('console-message', (_event, level, message, line, sourceId) => {
+      console.log(`[Renderer Console] [Level ${level}] ${message} (${sourceId}:${line})`);
+    });
+
+    this.mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL) => {
+      console.error(`[WindowManager] Main window failed to load: ${errorCode} - ${errorDescription} (${validatedURL})`);
+    });
+
+    this.mainWindow.webContents.on('did-finish-load', () => {
+      console.log('[WindowManager] Main window finished loading HTML');
+    });
+
     if (this.isDev) {
+      console.log('[WindowManager] Loading dev URL:', `${this.devServerUrl}#dashboard`);
       this.mainWindow.loadURL(`${this.devServerUrl}#dashboard`);
     } else {
-      this.mainWindow.loadFile(path.join(app.getAppPath(), 'dist/index.html'), {
+      const indexPath = path.join(app.getAppPath(), 'dist/index.html');
+      console.log('[WindowManager] Loading production file:', indexPath);
+      this.mainWindow.loadFile(indexPath, {
         hash: 'dashboard',
+      }).catch((err) => {
+        console.error('[WindowManager] Failed to loadFile indexPath:', indexPath, err);
       });
     }
 
     this.mainWindow.once('ready-to-show', () => {
+      console.log('[WindowManager] ready-to-show fired');
       this.mainWindow?.show();
+      this.mainWindow?.focus();
     });
 
     // Minimize to tray on close unless quitting
@@ -78,10 +99,10 @@ export class WindowManager {
     const primaryDisplay = screen.getPrimaryDisplay();
     const { workArea } = primaryDisplay;
 
-    const winWidth = 460;
-    const winHeight = 440;
-    const x = Math.round(workArea.x + workArea.width - winWidth - 20);
-    const y = Math.round(workArea.y + workArea.height - winHeight - 20);
+    const winWidth = 570;
+    const winHeight = 265;
+    const x = Math.round(workArea.x + workArea.width - winWidth - 16);
+    const y = Math.round(workArea.y + workArea.height - winHeight - 16);
 
     this.characterWindow = new BrowserWindow({
       width: winWidth,
@@ -90,6 +111,8 @@ export class WindowManager {
       y,
       frame: false,
       transparent: true,
+      backgroundColor: '#00000000',
+      autoHideMenuBar: true,
       resizable: false,
       alwaysOnTop: true,
       skipTaskbar: true,
@@ -99,7 +122,7 @@ export class WindowManager {
         preload: path.join(__dirname, 'preload.js'),
         contextIsolation: true,
         nodeIntegration: false,
-        sandbox: true,
+        sandbox: false,
       },
     });
 
@@ -107,10 +130,10 @@ export class WindowManager {
     this.characterWindow.setAlwaysOnTop(true, 'screen-saver');
 
     if (this.isDev) {
-      this.characterWindow.loadURL(`${this.devServerUrl}#character`);
+      this.characterWindow.loadURL(`${this.devServerUrl}#beacon`);
     } else {
       this.characterWindow.loadFile(path.join(app.getAppPath(), 'dist/index.html'), {
-        hash: 'character',
+        hash: 'beacon',
       });
     }
 
@@ -128,10 +151,10 @@ export class WindowManager {
     // Reposition to current work area in case of resolution changes
     const primaryDisplay = screen.getPrimaryDisplay();
     const { workArea } = primaryDisplay;
-    const winWidth = 460;
-    const winHeight = 440;
-    const x = Math.round(workArea.x + workArea.width - winWidth - 20);
-    const y = Math.round(workArea.y + workArea.height - winHeight - 20);
+    const winWidth = 570;
+    const winHeight = 265;
+    const x = Math.round(workArea.x + workArea.width - winWidth - 16);
+    const y = Math.round(workArea.y + workArea.height - winHeight - 16);
 
     this.characterWindow?.setBounds({ x, y, width: winWidth, height: winHeight });
     this.characterWindow?.showInactive();

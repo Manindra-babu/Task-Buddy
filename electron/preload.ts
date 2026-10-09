@@ -17,11 +17,14 @@ export interface ITaskBuddyAPI {
   // Settings
   getSettings: () => Promise<AppSettings>;
   updateSettings: (updates: Partial<AppSettings>) => Promise<AppSettings>;
-  previewCharacter: () => Promise<void>;
+  previewBeacon: () => Promise<void>;
+  previewCharacter: () => Promise<void>; // Alias
 
   // System & Navigation
   openDashboard: () => Promise<void>;
-  hideCharacter: () => Promise<void>;
+  openExternalUrl: (url: string) => Promise<boolean>;
+  hideBeacon: () => Promise<void>;
+  hideCharacter: () => Promise<void>; // Alias
   quitApp: () => Promise<void>;
 
   // Event Listeners
@@ -43,10 +46,13 @@ const api: ITaskBuddyAPI = {
 
   getSettings: () => ipcRenderer.invoke('settings:get'),
   updateSettings: (updates) => ipcRenderer.invoke('settings:update', updates),
-  previewCharacter: () => ipcRenderer.invoke('character:preview'),
+  previewBeacon: () => ipcRenderer.invoke('beacon:preview'),
+  previewCharacter: () => ipcRenderer.invoke('beacon:preview'),
 
   openDashboard: () => ipcRenderer.invoke('system:openDashboard'),
-  hideCharacter: () => ipcRenderer.invoke('character:hide'),
+  openExternalUrl: (url: string) => ipcRenderer.invoke('system:openExternal', url),
+  hideBeacon: () => ipcRenderer.invoke('beacon:hide'),
+  hideCharacter: () => ipcRenderer.invoke('beacon:hide'),
   quitApp: () => ipcRenderer.invoke('system:quit'),
 
   onReminderDue: (callback) => {

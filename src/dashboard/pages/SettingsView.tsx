@@ -102,27 +102,37 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </p>
 
           {formData.quietHoursEnabled && (
-            <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 14, color: '#334155' }}>Start:</span>
-                <input
-                  type="time"
-                  className="form-input"
-                  style={{ width: 120 }}
-                  value={formData.quietHoursStart}
-                  onChange={(e) => handleChange('quietHoursStart', e.target.value)}
-                />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 14, color: '#334155' }}>Start:</span>
+                  <input
+                    type="time"
+                    className="form-input"
+                    style={{ width: 120 }}
+                    value={formData.quietHoursStart}
+                    onChange={(e) => handleChange('quietHoursStart', e.target.value)}
+                  />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 14, color: '#334155' }}>End:</span>
+                  <input
+                    type="time"
+                    className="form-input"
+                    style={{ width: 120 }}
+                    value={formData.quietHoursEnd}
+                    onChange={(e) => handleChange('quietHoursEnd', e.target.value)}
+                  />
+                </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 14, color: '#334155' }}>End:</span>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#475569', cursor: 'pointer' }}>
                 <input
-                  type="time"
-                  className="form-input"
-                  style={{ width: 120 }}
-                  value={formData.quietHoursEnd}
-                  onChange={(e) => handleChange('quietHoursEnd', e.target.value)}
+                  type="checkbox"
+                  checked={formData.quietHoursAllowVisual}
+                  onChange={(e) => handleChange('quietHoursAllowVisual', e.target.checked)}
                 />
-              </div>
+                Show visual beacon alerts during quiet hours while keeping voice alerts muted
+              </label>
             </div>
           )}
         </div>
@@ -143,7 +153,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             </label>
           </div>
           <p style={{ fontSize: 13, color: '#64748b', marginBottom: 16 }}>
-            Speaks reminders using local Windows System.Speech. Zero external or cloud requests.
+            Speaks reminder headlines using local Windows System.Speech. Muted by default for quiet focus. Zero external network calls.
           </p>
 
           {formData.voiceEnabled && (
@@ -178,42 +188,57 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           )}
         </div>
 
-        {/* Companion Appearance Card */}
+        {/* The Deadline Beacon Settings Card */}
         <div className="card" style={{ padding: 20 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0f172a', marginBottom: 12 }}>
-            3D Companion Appearance
-          </h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0f172a' }}>
+              The Deadline Beacon
+            </h3>
+            <a
+              href="#preview"
+              className="btn btn-secondary btn-sm"
+              style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}
+            >
+              <Sparkles size={13} color="#2563eb" />
+              Open Beacon Studio
+            </a>
+          </div>
+          <p style={{ fontSize: 13, color: '#64748b', marginBottom: 14 }}>
+            Signature luminous indicator at the bottom-right desktop work area. Pure CSS/SVG motion, zero 3D overhead.
+          </p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <div>
-              <label className="form-label">Avatar Model</label>
+              <label className="form-label">Animation Intensity</label>
               <select
                 className="form-select"
-                value={formData.avatarModel}
-                onChange={(e) => handleChange('avatarModel', e.target.value)}
+                value={formData.beaconAnimationIntensity}
+                onChange={(e) => handleChange('beaconAnimationIntensity', e.target.value)}
               >
-                <option value="student">Student Companion (3D Rigged Boy)</option>
-                <option value="robot">Expressive Robot Companion</option>
+                <option value="subdued">Subdued (Gentle 3.4s Breathing)</option>
+                <option value="standard">Standard (Balanced 2.6s Pulse)</option>
+                <option value="vibrant">Vibrant (Expressive 1.9s Pulse)</option>
+                <option value="reduced">Reduced Motion (Static Indicator)</option>
               </select>
             </div>
             <div>
-              <label className="form-label">Scale</label>
+              <label className="form-label">Default Snooze Duration</label>
               <select
                 className="form-select"
-                value={formData.characterSize}
-                onChange={(e) => handleChange('characterSize', e.target.value)}
+                value={formData.snoozeDefaultMinutes}
+                onChange={(e) => handleChange('snoozeDefaultMinutes', parseInt(e.target.value, 10))}
               >
-                <option value="compact">Compact</option>
-                <option value="normal">Standard (Recommended)</option>
-                <option value="large">Spacious</option>
+                <option value={15}>15 Minutes</option>
+                <option value={30}>30 Minutes</option>
+                <option value={60}>1 Hour</option>
               </select>
             </div>
           </div>
         </div>
 
-        {/* Startup & System Card */}
+        {/* Startup & Data Storage Card */}
         <div className="card" style={{ padding: 20 }}>
           <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0f172a', marginBottom: 12 }}>
-            Windows System Integration
+            Windows System Integration & Local Storage
           </h3>
           <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, cursor: 'pointer' }}>
             <input
@@ -226,19 +251,26 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           <div
             style={{
               marginTop: 14,
-              padding: '10px 14px',
+              padding: '12px 14px',
               backgroundColor: '#f8fafc',
+              border: '1px solid #e2e8f0',
               borderRadius: 8,
               fontSize: 12,
-              color: '#64748b',
+              color: '#475569',
               display: 'flex',
-              alignItems: 'center',
-              gap: 8,
+              flexDirection: 'column',
+              gap: 4,
             }}
           >
-            <ShieldCheck size={16} color="#16a34a" />
-            <span>
-              All tasks and configurations are stored strictly locally in SQLite within your Windows user profile.
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600, color: '#0f172a' }}>
+              <Database size={14} color="#2563eb" />
+              <span>SQLite Data Storage:</span>
+            </div>
+            <code style={{ fontSize: 11, color: '#334155', backgroundColor: '#ffffff', padding: '3px 6px', borderRadius: 4, border: '1px solid #cbd5e1' }}>
+              %APPDATA%\TaskBuddy\taskbuddy.sqlite
+            </code>
+            <span style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
+              Your tasks and reminder schedules remain entirely private on your machine and are preserved across updates.
             </span>
           </div>
         </div>
@@ -251,7 +283,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             className="btn btn-secondary"
           >
             <Sparkles size={16} color="#2563eb" />
-            Test 3D Companion Now
+            Test Deadline Beacon
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

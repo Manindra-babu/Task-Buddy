@@ -4,6 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TaskBuddy</title>
+    <script>
+      (function() {
+        var h = window.location.hash || '';
+        var s = window.location.search || '';
+        if (h.indexOf('beacon') !== -1 || h.indexOf('character') !== -1 || s.indexOf('beacon') !== -1) {
+          document.documentElement.style.background = 'transparent';
+          document.documentElement.style.backgroundColor = 'transparent';
+          if (document.body) {
+            document.body.style.background = 'transparent';
+            document.body.style.backgroundColor = 'transparent';
+          }
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

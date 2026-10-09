@@ -31,6 +31,10 @@ export class SettingsRepository {
           : DEFAULT_SETTINGS.defaultReminderDeadlineDay,
       defaultDeadlineTime:
         settingsMap.get('defaultDeadlineTime') || DEFAULT_SETTINGS.defaultDeadlineTime,
+      snoozeDefaultMinutes:
+        typeof settingsMap.get('snoozeDefaultMinutes') === 'number'
+          ? settingsMap.get('snoozeDefaultMinutes')
+          : DEFAULT_SETTINGS.snoozeDefaultMinutes,
       quietHoursEnabled:
         settingsMap.has('quietHoursEnabled')
           ? Boolean(settingsMap.get('quietHoursEnabled'))
@@ -39,6 +43,10 @@ export class SettingsRepository {
         settingsMap.get('quietHoursStart') || DEFAULT_SETTINGS.quietHoursStart,
       quietHoursEnd:
         settingsMap.get('quietHoursEnd') || DEFAULT_SETTINGS.quietHoursEnd,
+      quietHoursAllowVisual:
+        settingsMap.has('quietHoursAllowVisual')
+          ? Boolean(settingsMap.get('quietHoursAllowVisual'))
+          : DEFAULT_SETTINGS.quietHoursAllowVisual,
       voiceEnabled:
         settingsMap.has('voiceEnabled')
           ? Boolean(settingsMap.get('voiceEnabled'))
@@ -51,6 +59,12 @@ export class SettingsRepository {
         typeof settingsMap.get('voiceRate') === 'number'
           ? settingsMap.get('voiceRate')
           : DEFAULT_SETTINGS.voiceRate,
+      beaconAnimationIntensity:
+        settingsMap.get('beaconAnimationIntensity') || DEFAULT_SETTINGS.beaconAnimationIntensity,
+      notificationGrouping:
+        settingsMap.has('notificationGrouping')
+          ? Boolean(settingsMap.get('notificationGrouping'))
+          : DEFAULT_SETTINGS.notificationGrouping,
       characterSize:
         settingsMap.get('characterSize') || DEFAULT_SETTINGS.characterSize,
       avatarModel:

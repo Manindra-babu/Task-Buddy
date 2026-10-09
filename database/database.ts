@@ -17,22 +17,33 @@ export class TaskBuddyDatabase {
       if (config?.wasmBinaryPath && fs.existsSync(config.wasmBinaryPath)) {
         return config.wasmBinaryPath;
       }
+      const resourcesPath = (process as any).resourcesPath;
       // Common locations
       const possiblePaths = [
+        resourcesPath ? path.join(resourcesPath, file) : '',
+        resourcesPath ? path.join(resourcesPath, 'assets', file) : '',
         path.join(__dirname, file),
         path.join(__dirname, '../node_modules/sql.js/dist', file),
         path.join(__dirname, '../../node_modules/sql.js/dist', file),
         path.join(process.cwd(), 'node_modules/sql.js/dist', file),
         path.join(process.cwd(), file),
-      ];
+      ].filter(Boolean);
       for (const p of possiblePaths) {
         if (fs.existsSync(p)) return p;
       }
       return file;
     };
 
+    const resolvedWasmPath = wasmLocate('sql-wasm.wasm');
+    let wasmBinary: ArrayBuffer | undefined = undefined;
+    if (fs.existsSync(resolvedWasmPath)) {
+      const buf = fs.readFileSync(resolvedWasmPath);
+      wasmBinary = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+    }
+
     const SQL = await initSqlJs({
       locateFile: wasmLocate,
+      wasmBinary,
     });
 
     if (config?.dbPath && config.dbPath !== ':memory:') {
@@ -124,6 +135,25 @@ export class TaskBuddyDatabase {
 
       this.run('INSERT INTO migrations (version, applied_at) VALUES (?, ?)', [
         1,
+        new Date().toISOString(),
+      ]);
+    }
+
+    // Migration 2: Add next_action and destination_url to tasks
+    if (!appliedVersions.includes(2)) {
+      try {
+        this.db.run(`ALTER TABLE tasks ADD COLUMN next_action TEXT;`);
+      } catch {
+        // column may already exist
+      }
+      try {
+        this.db.run(`ALTER TABLE tasks ADD COLUMN destination_url TEXT;`);
+      } catch {
+        // column may already exist
+      }
+
+      this.run('INSERT INTO migrations (version, applied_at) VALUES (?, ?)', [
+        2,
         new Date().toISOString(),
       ]);
     }

@@ -60,7 +60,7 @@ export const Header: React.FC<HeaderProps> = ({
               fontWeight: 600,
             }}
           >
-            Desktop Companion
+            The Deadline Beacon
           </span>
         </div>
         <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>
@@ -72,10 +72,10 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={onPreviewCharacter}
           className="btn btn-secondary btn-sm"
-          title="Preview 3D Character & Voice"
+          title="Test The Deadline Beacon"
         >
           <Sparkles size={14} color="#2563eb" />
-          Preview Companion
+          Test Beacon
         </button>
 
         <button onClick={onAddTask} className="btn btn-primary btn-sm">

@@ -16,7 +16,7 @@ export class TrayManager {
     // Generate simple 16x16 tray icon programmatically or from assets
     const icon = this.createDefaultIcon();
     this.tray = new Tray(icon);
-    this.tray.setToolTip('TaskBuddy - Deadline Companion');
+    this.tray.setToolTip('TaskBuddy - The Deadline Beacon');
 
     this.tray.on('double-click', () => {
       this.windowManager.createMainWindow();
@@ -32,13 +32,21 @@ export class TrayManager {
 
     const contextMenu = Menu.buildFromTemplate([
       {
-        label: 'Open TaskBuddy',
+        label: 'Open Dashboard',
         click: () => {
           this.windowManager.createMainWindow();
         },
       },
       {
-        label: 'Character Preview',
+        label: 'Add Task...',
+        click: () => {
+          this.windowManager.createMainWindow();
+          const win = this.windowManager.getMainWindow();
+          win?.webContents.send('tasks:openNewModal');
+        },
+      },
+      {
+        label: 'Test Deadline Beacon',
         click: () => {
           this.onPreview();
         },

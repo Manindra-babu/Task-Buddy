@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron';
+import { ipcMain, shell } from 'electron';
 import { ReminderScheduler } from '../../src/reminders/scheduler';
 import { WindowManager } from '../windows';
 import { WindowsVoiceService } from '../../src/voice/voice-service';
@@ -17,8 +17,18 @@ export function registerReminderHandlers(
       voiceService.stop();
       scheduler.handleUserAction(action, reminderId, snoozeMinutes ?? 15);
 
-      // Hide character after user dismisses or acts on it
+      // Hide beacon window after action
       windowManager.hideCharacter();
+
+      if (action === 'start') {
+        windowManager.createMainWindow();
+        const mainWindow = windowManager.getMainWindow();
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          if (mainWindow.isMinimized()) mainWindow.restore();
+          mainWindow.show();
+          mainWindow.focus();
+        }
+      }
 
       // If marked done or updated, refresh main dashboard if open
       const mainWindow = windowManager.getMainWindow();
@@ -28,7 +38,7 @@ export function registerReminderHandlers(
     }
   );
 
-  ipcMain.handle('character:preview', async () => {
+  const handlePreview = async () => {
     const settings = settingsRepo.getSettings();
     const previewPayload: ReminderEventPayload = {
       reminder: {
@@ -50,16 +60,17 @@ export function registerReminderHandlers(
         deadline_at: new Date(Date.now() + 3600000 * 2).toISOString(),
         priority: 'high',
         status: 'pending',
-        notes: 'Preview demo for character companion.',
+        notes: 'Final slide deck and live demo test.',
+        next_action: 'Finish the final demo and verify the submission.',
+        destination_url: 'https://devpost.com',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         completed_at: null,
       },
-      message:
-        "Hey! I'm TaskBuddy, your desktop deadline companion. I'll make sure you never miss a deadline!",
+      message: 'Hackathon presentation is due in 2 hours! Finish the final demo and verify the submission.',
       categoryLabel: 'Hackathons',
       isOverdue: false,
-      remainingText: 'in 2 hours',
+      remainingText: 'Due in 2 hours',
       queueCount: 1,
     };
 
@@ -76,10 +87,25 @@ export function registerReminderHandlers(
         voiceEnabled: settings.voiceEnabled,
       });
     }
-  });
+  };
 
+  ipcMain.handle('beacon:preview', handlePreview);
+  ipcMain.handle('character:preview', handlePreview);
+
+  ipcMain.handle('beacon:hide', async () => {
+    voiceService.stop();
+    windowManager.hideCharacter();
+  });
   ipcMain.handle('character:hide', async () => {
     voiceService.stop();
     windowManager.hideCharacter();
+  });
+
+  ipcMain.handle('system:openExternal', async (_event, url: string) => {
+    if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+      await shell.openExternal(url);
+      return true;
+    }
+    return false;
   });
 }

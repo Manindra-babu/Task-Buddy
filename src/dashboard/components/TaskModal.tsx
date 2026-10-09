@@ -15,6 +15,8 @@ interface TaskModalProps {
     deadlineToTime?: string;
     priority: TaskPriority;
     notes?: string;
+    next_action?: string;
+    destination_url?: string;
   }) => Promise<void>;
   initialTask?: Task | null;
   defaultDeadlineTime?: string;
@@ -33,6 +35,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   const [deadlineToTime, setDeadlineToTime] = useState(defaultDeadlineTime);
   const [priority, setPriority] = useState<TaskPriority>('medium');
   const [notes, setNotes] = useState('');
+  const [nextAction, setNextAction] = useState('');
+  const [destinationUrl, setDestinationUrl] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -45,6 +49,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       setDeadlineToTime(formatTimeForInput(d));
       setPriority(initialTask.priority);
       setNotes(initialTask.notes || '');
+      setNextAction(initialTask.next_action || '');
+      setDestinationUrl(initialTask.destination_url || '');
     } else {
       setTitle('');
       setCategory('online_tests');
@@ -54,6 +60,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       setDeadlineToTime(defaultDeadlineTime);
       setPriority('medium');
       setNotes('');
+      setNextAction('');
+      setDestinationUrl('');
     }
     setErrors({});
   }, [initialTask, isOpen, defaultDeadlineTime]);
@@ -69,6 +77,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       deadlineToTime,
       priority,
       notes,
+      next_action: nextAction,
+      destination_url: destinationUrl,
     });
 
     if (!validation.valid) {
@@ -85,6 +95,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
         deadlineToTime,
         priority,
         notes: notes.trim() ? notes.trim() : undefined,
+        next_action: nextAction.trim() ? nextAction.trim() : undefined,
+        destination_url: destinationUrl.trim() ? destinationUrl.trim() : undefined,
       });
       onClose();
     } catch (err: any) {
@@ -254,13 +266,39 @@ export const TaskModal: React.FC<TaskModalProps> = ({
             </div>
           </div>
 
+          {/* Next Action / Step */}
+          <div style={{ marginBottom: 14 }}>
+            <label className="form-label">Next Action / Immediate Step (Optional)</label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="e.g. Finish demo video, review slides with team..."
+              value={nextAction}
+              onChange={(e) => setNextAction(e.target.value)}
+            />
+            {errors.next_action && <div className="form-error">{errors.next_action}</div>}
+          </div>
+
+          {/* Destination URL */}
+          <div style={{ marginBottom: 14 }}>
+            <label className="form-label">Destination URL (Optional)</label>
+            <input
+              type="url"
+              className="form-input"
+              placeholder="https://devpost.com, https://canvas.edu..."
+              value={destinationUrl}
+              onChange={(e) => setDestinationUrl(e.target.value)}
+            />
+            {errors.destination_url && <div className="form-error">{errors.destination_url}</div>}
+          </div>
+
           {/* Notes */}
           <div style={{ marginBottom: 20 }}>
             <label className="form-label">Notes (Optional)</label>
             <textarea
               className="form-textarea"
-              rows={3}
-              placeholder="Links, submission rules, or team guidelines..."
+              rows={2}
+              placeholder="Guidelines, rules, or details..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
             />

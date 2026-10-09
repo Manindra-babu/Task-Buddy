@@ -161,4 +161,39 @@ describe('Database & Repositories Unit Tests', () => {
     expect(s3.defaultDeadlineTime).toBe('10:30');
     expect(s3.voiceEnabled).toBe(false);
   });
+
+  it('persists next_action, destination_url and beacon settings', () => {
+    const task = taskRepo.create({
+      id: 'task_beacon',
+      title: 'Hackathon Final Demo',
+      category: 'hackathons',
+      deadline_at: new Date('2026-10-25T14:00:00Z').toISOString(),
+      priority: 'high',
+      next_action: 'Record demo screencast and upload',
+      destination_url: 'https://devpost.com',
+    });
+
+    expect(task.next_action).toBe('Record demo screencast and upload');
+    expect(task.destination_url).toBe('https://devpost.com');
+
+    const fetched = taskRepo.getById('task_beacon');
+    expect(fetched?.next_action).toBe('Record demo screencast and upload');
+    expect(fetched?.destination_url).toBe('https://devpost.com');
+
+    // Update next action
+    const updated = taskRepo.update('task_beacon', {
+      next_action: 'Submit pull request',
+    });
+    expect(updated?.next_action).toBe('Submit pull request');
+
+    // Settings update
+    const updatedSettings = settingsRepo.updateSettings({
+      beaconAnimationIntensity: 'vibrant',
+      snoozeDefaultMinutes: 30,
+      quietHoursAllowVisual: true,
+    });
+    expect(updatedSettings.beaconAnimationIntensity).toBe('vibrant');
+    expect(updatedSettings.snoozeDefaultMinutes).toBe(30);
+    expect(updatedSettings.quietHoursAllowVisual).toBe(true);
+  });
 });

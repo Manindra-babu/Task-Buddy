@@ -40,10 +40,16 @@ body {
   overflow-x: hidden;
 }
 
-/* Transparent background specifically for character window */
-body.character-window-mode {
+/* Transparent background specifically for beacon / companion overlay window */
+html.beacon-window-mode,
+html.character-window-mode,
+body.beacon-window-mode,
+body.character-window-mode,
+#root.beacon-window-mode,
+#root.character-window-mode {
   background: transparent !important;
-  overflow: hidden;
+  background-color: transparent !important;
+  overflow: hidden !important;
 }
 
 /* Buttons */

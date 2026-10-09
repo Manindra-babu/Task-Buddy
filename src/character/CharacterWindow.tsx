@@ -6,30 +6,24 @@ import { ReminderEventPayload, CharacterAnimationState } from '../shared/types';
 export const CharacterWindow: React.FC = () => {
   const [payload, setPayload] = useState<ReminderEventPayload | null>(null);
   const [animState, setAnimState] = useState<CharacterAnimationState>('entering');
-  const [avatarModel, setAvatarModel] = useState<'student' | 'robot'>('student');
 
   useEffect(() => {
     // Add transparent body class
     document.body.classList.add('character-window-mode');
 
-    // Fetch initial settings to get avatarModel
     if (window.taskBuddy) {
-      window.taskBuddy.getSettings().then((s) => {
-        if (s?.avatarModel) setAvatarModel(s.avatarModel);
-      });
-
       // Listen for due reminder
       const unsubReminder = window.taskBuddy.onReminderDue((data) => {
         setPayload(data);
         setAnimState('entering');
-        setTimeout(() => setAnimState('speaking'), 1200);
+        setTimeout(() => setAnimState('speaking'), 1000);
       });
 
       // Listen for preview
       const unsubPreview = window.taskBuddy.onPreviewTriggered((data) => {
         setPayload(data);
         setAnimState('entering');
-        setTimeout(() => setAnimState('speaking'), 1200);
+        setTimeout(() => setAnimState('speaking'), 1000);
       });
 
       return () => {
@@ -48,13 +42,13 @@ export const CharacterWindow: React.FC = () => {
       setAnimState('dismissed');
     }
 
-    // Delay slightly so animation can trigger before window hides
+    // Delay slightly so celebration/dismiss animation triggers before window hides
     setTimeout(async () => {
       if (window.taskBuddy) {
         await window.taskBuddy.handleReminderAction(action, payload.reminder.id);
       }
       setPayload(null);
-    }, 600);
+    }, 700);
   };
 
   return (
@@ -62,20 +56,47 @@ export const CharacterWindow: React.FC = () => {
       style={{
         width: '100vw',
         height: '100vh',
-        position: 'relative',
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'flex-end',
+        padding: '12px 14px',
         overflow: 'hidden',
-        pointerEvents: 'auto',
+        pointerEvents: 'none',
+        userSelect: 'none',
       }}
     >
-      {/* 3D Character Area */}
-      <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}>
-        <CharacterScene state={animState} avatarModel={avatarModel} />
-      </div>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-end',
+          gap: '10px',
+          pointerEvents: 'auto',
+        }}
+      >
+        {/* Floating Windows 11 Reminder Card */}
+        {payload && (
+          <div style={{ marginBottom: 12 }}>
+            <SpeechBubble payload={payload} onAction={handleAction} />
+          </div>
+        )}
 
-      {/* Floating Speech Bubble */}
-      {payload && (
-        <SpeechBubble payload={payload} onAction={handleAction} />
-      )}
+        {/* 3D Cute Robot Mascot Companion (210px wide x 230px tall) */}
+        <div
+          style={{
+            width: 210,
+            height: 230,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <CharacterScene
+            state={animState}
+            width={210}
+            height={230}
+          />
+        </div>
+      </div>
     </div>
   );
 };

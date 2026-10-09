@@ -3,4 +3,6 @@ dist/
 release/
 *.sqlite
 *.sqlite.tmp
+*.log
+taskbuddy_out.txt
 .DS_Store

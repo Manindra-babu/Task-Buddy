@@ -1,0 +1,166 @@
+/* The Deadline Beacon Animation System */
+
+:root {
+  --beacon-pulse-duration: 2.6s;
+  --beacon-glow-radius: 14px;
+  --beacon-core-scale: 1.0;
+}
+
+/* Animation Intensity Variants */
+.beacon-intensity-subdued {
+  --beacon-pulse-duration: 3.4s;
+  --beacon-glow-radius: 8px;
+}
+
+.beacon-intensity-standard {
+  --beacon-pulse-duration: 2.6s;
+  --beacon-glow-radius: 14px;
+}
+
+.beacon-intensity-vibrant {
+  --beacon-pulse-duration: 1.9s;
+  --beacon-glow-radius: 20px;
+}
+
+.beacon-intensity-reduced {
+  --beacon-pulse-duration: 0s;
+  --beacon-glow-radius: 4px;
+}
+
+/* Luminous Core Breathing Pulse */
+@keyframes beaconCorePulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.95;
+    box-shadow: 0 0 calc(var(--beacon-glow-radius) * 0.75) currentColor;
+  }
+  50% {
+    transform: scale(1.14);
+    opacity: 1;
+    box-shadow: 0 0 calc(var(--beacon-glow-radius) * 1.5) currentColor, 0 0 calc(var(--beacon-glow-radius) * 2.2) currentColor;
+  }
+}
+
+/* Concentric Luminous Halo Ring Pulse */
+@keyframes beaconRingPulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.8;
+  }
+  60% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+/* Success Celebration Wave */
+@keyframes beaconCompletionWave {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1.22);
+    box-shadow: 0 0 0 35px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+/* Entrance from Bottom-Right Work Area */
+@keyframes beaconSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Exit to Right */
+@keyframes beaconSlideOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(30px) scale(0.92);
+  }
+}
+
+/* Card Smooth Expansion from Beacon */
+@keyframes reminderCardExpand {
+  0% {
+    opacity: 0;
+    transform: scale(0.94) translateX(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+  }
+}
+
+/* Card Collapse */
+@keyframes reminderCardCollapse {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.94) translateX(16px);
+  }
+}
+
+/* Pulse Classes */
+.animate-beacon-core {
+  animation: beaconCorePulse var(--beacon-pulse-duration) ease-in-out infinite;
+}
+
+.animate-beacon-ring {
+  animation: beaconRingPulse var(--beacon-pulse-duration) cubic-bezier(0.2, 0.6, 0.35, 1) infinite;
+}
+
+.animate-beacon-complete {
+  animation: beaconCompletionWave 0.75s ease-out forwards;
+}
+
+.animate-beacon-in {
+  animation: beaconSlideIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-beacon-out {
+  animation: beaconSlideOut 0.28s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.animate-card-expand {
+  animation: reminderCardExpand 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-card-collapse {
+  animation: reminderCardCollapse 0.22s ease-in forwards;
+}
+
+/* Respect user's Windows reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-beacon-core,
+  .animate-beacon-ring,
+  .animate-beacon-complete {
+    animation: none !important;
+  }
+  .animate-beacon-in,
+  .animate-beacon-out,
+  .animate-card-expand,
+  .animate-card-collapse {
+    animation-duration: 0.05s !important;
+  }
+}

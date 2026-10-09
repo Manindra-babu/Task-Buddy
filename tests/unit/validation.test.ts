@@ -69,4 +69,39 @@ describe('Task Validator Unit Tests', () => {
     expect(res.valid).toBe(false);
     expect(res.errors.priority).toBe('Priority must be Low, Medium, or High');
   });
+
+  it('validates optional next_action and destination_url', () => {
+    const res = validateTaskInput({
+      title: 'Hackathon Submission',
+      category: 'hackathons',
+      deadlineDate: '2026-10-15',
+      priority: 'high',
+      next_action: 'Record final demo video',
+      destination_url: 'https://devpost.com',
+    });
+    expect(res.valid).toBe(true);
+    expect(res.errors).toEqual({});
+  });
+
+  it('fails when destination_url has invalid format or non-http protocol', () => {
+    const res = validateTaskInput({
+      title: 'Hackathon Submission',
+      category: 'hackathons',
+      deadlineDate: '2026-10-15',
+      priority: 'high',
+      destination_url: 'ftp://not-allowed.com',
+    });
+    expect(res.valid).toBe(false);
+    expect(res.errors.destination_url).toContain('http:// or https://');
+
+    const res2 = validateTaskInput({
+      title: 'Hackathon Submission',
+      category: 'hackathons',
+      deadlineDate: '2026-10-15',
+      priority: 'high',
+      destination_url: 'invalid-url',
+    });
+    expect(res2.valid).toBe(false);
+    expect(res2.errors.destination_url).toContain('valid URL');
+  });
 });

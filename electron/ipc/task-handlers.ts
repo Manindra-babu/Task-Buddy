@@ -35,6 +35,8 @@ export function registerTaskHandlers(
       deadline_at: deadlineIso,
       priority: input.priority,
       notes: input.notes,
+      next_action: input.next_action,
+      destination_url: input.destination_url,
     });
 
     scheduler.onTaskChanged(task);
@@ -64,6 +66,8 @@ export function registerTaskHandlers(
         deadline_at: newDeadlineIso,
         priority: updates.priority,
         notes: updates.notes,
+        next_action: updates.next_action,
+        destination_url: updates.destination_url,
       });
 
       if (updated) {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ReminderEventPayload } from '../shared/types';
-import { CheckCircle2, Clock, Play, X, Bell } from 'lucide-react';
+import { Calendar, Clock, CheckCircle2, X, AlertCircle } from 'lucide-react';
 
 interface SpeechBubbleProps {
   payload: ReminderEventPayload;
@@ -10,137 +10,162 @@ interface SpeechBubbleProps {
 export const SpeechBubble: React.FC<SpeechBubbleProps> = ({ payload, onAction }) => {
   return (
     <div
-      className="speech-bubble no-drag-region"
+      className="no-drag-region"
       style={{
-        position: 'absolute',
-        top: 12,
-        left: 12,
-        right: 12,
-        background: '#ffffff',
-        borderRadius: 14,
-        padding: '16px',
-        boxShadow: '0 12px 32px rgba(15, 23, 42, 0.18)',
+        width: '320px',
+        backgroundColor: '#ffffff',
+        borderRadius: '16px',
+        padding: '16px 18px',
+        boxShadow: '0 16px 36px rgba(15, 23, 42, 0.16), 0 2px 6px rgba(0, 0, 0, 0.04)',
         border: '1px solid #e2e8f0',
-        zIndex: 50,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+        fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
+        animation: 'fadeInSlide 0.25s ease-out forwards',
       }}
     >
-      {/* Header with category and dismiss button */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span
+      {/* Top Header: Brand icon & title + Close Button */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <div
             style={{
-              fontSize: 11,
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              background: '#eff6ff',
-              color: '#2563eb',
-              padding: '2px 8px',
+              width: 22,
+              height: 22,
               borderRadius: 6,
+              backgroundColor: '#eff6ff',
+              color: '#2563eb',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            {payload.categoryLabel}
+            <Calendar size={13} />
+          </div>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>
+            TaskBuddy
           </span>
-          <span
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: payload.isOverdue ? '#dc2626' : '#d97706',
-            }}
-          >
-            {payload.remainingText}
-          </span>
-          {payload.queueCount && payload.queueCount > 1 && (
+          {payload.queueCount && payload.queueCount > 1 ? (
             <span
               style={{
                 fontSize: 11,
-                background: '#f1f5f9',
-                color: '#475569',
+                fontWeight: 600,
+                color: '#2563eb',
+                backgroundColor: '#eff6ff',
                 padding: '2px 6px',
                 borderRadius: 4,
-                fontWeight: 600,
               }}
             >
               +{payload.queueCount - 1} more
             </span>
-          )}
+          ) : null}
         </div>
+
         <button
           onClick={() => onAction('dismiss')}
           style={{
-            background: 'transparent',
+            background: 'none',
             border: 'none',
             cursor: 'pointer',
             color: '#94a3b8',
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'center',
             padding: 4,
-            borderRadius: 4,
+            borderRadius: 6,
           }}
           title="Dismiss"
         >
-          <X size={16} />
+          <X size={15} />
         </button>
       </div>
 
-      {/* Task title */}
-      <div
-        style={{
-          fontSize: 15,
-          fontWeight: 700,
-          color: '#0f172a',
-          marginBottom: 6,
-          lineHeight: 1.3,
-        }}
-      >
-        {payload.task.title}
-      </div>
-
-      {/* Spoken message */}
-      <div
-        style={{
-          fontSize: 13,
-          color: '#475569',
-          lineHeight: 1.45,
-          marginBottom: 14,
-        }}
-      >
+      {/* Main Reminder Headline */}
+      <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', lineHeight: 1.35 }}>
         {payload.message}
       </div>
 
-      {/* Action buttons */}
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+      {/* Task notes if present */}
+      {payload.task.notes ? (
+        <div style={{ fontSize: 12, color: '#64748b', lineHeight: 1.4 }}>
+          {payload.task.notes}
+        </div>
+      ) : null}
+
+      {/* Info Pills */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 4,
+          backgroundColor: '#f8fafc',
+          padding: '8px 10px',
+          borderRadius: 8,
+          border: '1px solid #f1f5f9',
+          fontSize: 11.5,
+          color: '#475569',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Clock size={12} color={payload.isOverdue ? '#dc2626' : '#2563eb'} />
+          <span>
+            <strong>Deadline:</strong> {payload.remainingText}
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <AlertCircle size={12} color="#64748b" />
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <strong>Task:</strong> {payload.task.title}
+          </span>
+        </div>
+      </div>
+
+      {/* Action Buttons Row */}
+      <div style={{ display: 'flex', gap: 6, marginTop: 2 }}>
         <button
           onClick={() => onAction('start')}
-          className="btn btn-primary btn-sm"
-          style={{ flex: 1, minWidth: 90 }}
+          className="btn btn-primary"
+          style={{
+            flex: 1.2,
+            padding: '6px 10px',
+            fontSize: 12,
+            fontWeight: 700,
+            borderRadius: 8,
+          }}
         >
-          <Play size={13} />
-          Start
+          Open
         </button>
 
         <button
           onClick={() => onAction('snooze')}
-          className="btn btn-secondary btn-sm"
-          style={{ flex: 1, minWidth: 100 }}
+          className="btn btn-secondary"
+          style={{
+            flex: 1,
+            padding: '6px 8px',
+            fontSize: 12,
+            fontWeight: 600,
+            borderRadius: 8,
+          }}
         >
-          <Clock size={13} />
-          Remind Later
+          Snooze
         </button>
 
         <button
           onClick={() => onAction('done')}
-          className="btn btn-secondary btn-sm"
+          className="btn btn-secondary"
           style={{
-            flex: 1,
-            minWidth: 80,
+            flex: 1.1,
+            padding: '6px 8px',
+            fontSize: 12,
+            fontWeight: 600,
+            borderRadius: 8,
             color: '#16a34a',
+            backgroundColor: '#f0fdf4',
             borderColor: '#bbf7d0',
-            background: '#f0fdf4',
           }}
         >
-          <CheckCircle2 size={13} />
-          Done
+          <CheckCircle2 size={12} />
+          Mark Done
         </button>
       </div>
     </div>
