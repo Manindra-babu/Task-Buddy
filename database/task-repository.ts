@@ -13,6 +13,7 @@ export class TaskRepository {
     notes?: string | null;
     next_action?: string | null;
     destination_url?: string | null;
+    remind_at?: string | null;
   }): Task {
     const now = new Date().toISOString();
     const task: Task = {
@@ -25,14 +26,15 @@ export class TaskRepository {
       notes: params.notes ? params.notes.trim() : null,
       next_action: params.next_action ? params.next_action.trim() : null,
       destination_url: params.destination_url ? params.destination_url.trim() : null,
+      remind_at: params.remind_at ? params.remind_at : null,
       created_at: now,
       updated_at: now,
       completed_at: null,
     };
 
     this.db.run(
-      `INSERT INTO tasks (id, title, category, deadline_at, priority, status, notes, next_action, destination_url, created_at, updated_at, completed_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO tasks (id, title, category, deadline_at, priority, status, notes, next_action, destination_url, remind_at, created_at, updated_at, completed_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         task.id,
         task.title,
@@ -43,6 +45,7 @@ export class TaskRepository {
         task.notes,
         task.next_action,
         task.destination_url,
+        task.remind_at,
         task.created_at,
         task.updated_at,
         task.completed_at,
@@ -76,6 +79,7 @@ export class TaskRepository {
       notes: string | null;
       next_action: string | null;
       destination_url: string | null;
+      remind_at: string | null;
       status: TaskStatus;
     }>
   ): Task | null {
@@ -90,13 +94,14 @@ export class TaskRepository {
     const newNotes = updates.notes !== undefined ? (updates.notes ? updates.notes.trim() : null) : current.notes;
     const newNextAction = updates.next_action !== undefined ? (updates.next_action ? updates.next_action.trim() : null) : current.next_action;
     const newDestUrl = updates.destination_url !== undefined ? (updates.destination_url ? updates.destination_url.trim() : null) : current.destination_url;
+    const newRemindAt = updates.remind_at !== undefined ? (updates.remind_at ? updates.remind_at : null) : (current as any).remind_at;
     const newStatus = updates.status !== undefined ? updates.status : current.status;
     const completedAt =
       newStatus === 'completed' ? (current.completed_at || now) : null;
 
     this.db.run(
       `UPDATE tasks
-       SET title = ?, category = ?, deadline_at = ?, priority = ?, notes = ?, next_action = ?, destination_url = ?, status = ?, completed_at = ?, updated_at = ?
+       SET title = ?, category = ?, deadline_at = ?, priority = ?, notes = ?, next_action = ?, destination_url = ?, remind_at = ?, status = ?, completed_at = ?, updated_at = ?
        WHERE id = ?`,
       [
         newTitle,
@@ -106,6 +111,7 @@ export class TaskRepository {
         newNotes,
         newNextAction,
         newDestUrl,
+        newRemindAt,
         newStatus,
         completedAt,
         now,

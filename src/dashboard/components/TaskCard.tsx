@@ -2,7 +2,7 @@ import React from 'react';
 import { Task } from '../../shared/types';
 import { CATEGORY_LABELS } from '../../shared/constants';
 import { formatDeadline, getTimeRemaining } from '../../shared/date-utils';
-import { Check, Edit2, Trash2, Calendar, FileText } from 'lucide-react';
+import { Check, Edit2, Trash2, Calendar, FileText, Bell } from 'lucide-react';
 
 interface TaskCardProps {
   task: Task;
@@ -114,6 +114,30 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               >
                 ({remaining.text})
               </span>
+            )}
+
+            {!isCompleted && task.remind_at && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  backgroundColor: '#eff6ff',
+                  color: '#2563eb',
+                  border: '1px solid #bfdbfe',
+                  borderRadius: 12,
+                  padding: '1px 8px',
+                  fontSize: 11,
+                  fontWeight: 600,
+                }}
+                title={`Reminder set for ${new Date(task.remind_at).toLocaleString()}`}
+              >
+                <Bell size={11} />
+                <span>
+                  Remind: {new Date(task.remind_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} at{' '}
+                  {new Date(task.remind_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                </span>
+              </div>
             )}
           </div>
 

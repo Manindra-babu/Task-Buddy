@@ -3,7 +3,7 @@ import { Task, TaskCategory, TaskPriority } from '../../shared/types';
 import { CATEGORY_LABELS } from '../../shared/constants';
 import { formatDateForInput, formatTimeForInput } from '../../shared/date-utils';
 import { validateTaskInput } from '../../tasks/validation/task-validator';
-import { X } from 'lucide-react';
+import { X, Bell, Clock } from 'lucide-react';
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -13,6 +13,8 @@ interface TaskModalProps {
     category: TaskCategory;
     deadlineDate: string;
     deadlineToTime?: string;
+    remindDate?: string;
+    remindTime?: string;
     priority: TaskPriority;
     notes?: string;
     next_action?: string;
@@ -33,6 +35,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   const [category, setCategory] = useState<TaskCategory>('online_tests');
   const [deadlineDate, setDeadlineDate] = useState('');
   const [deadlineToTime, setDeadlineToTime] = useState(defaultDeadlineTime);
+  const [remindDate, setRemindDate] = useState('');
+  const [remindTime, setRemindTime] = useState('');
   const [priority, setPriority] = useState<TaskPriority>('medium');
   const [notes, setNotes] = useState('');
   const [nextAction, setNextAction] = useState('');
@@ -47,6 +51,14 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       const d = new Date(initialTask.deadline_at);
       setDeadlineDate(formatDateForInput(d));
       setDeadlineToTime(formatTimeForInput(d));
+      if (initialTask.remind_at) {
+        const r = new Date(initialTask.remind_at);
+        setRemindDate(formatDateForInput(r));
+        setRemindTime(formatTimeForInput(r));
+      } else {
+        setRemindDate('');
+        setRemindTime('');
+      }
       setPriority(initialTask.priority);
       setNotes(initialTask.notes || '');
       setNextAction(initialTask.next_action || '');
@@ -58,6 +70,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       tomorrow.setDate(tomorrow.getDate() + 1);
       setDeadlineDate(formatDateForInput(tomorrow));
       setDeadlineToTime(defaultDeadlineTime);
+      setRemindDate('');
+      setRemindTime('');
       setPriority('medium');
       setNotes('');
       setNextAction('');
@@ -75,6 +89,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       category,
       deadlineDate,
       deadlineToTime,
+      remindDate: remindDate ? remindDate : undefined,
+      remindTime: remindTime ? remindTime : undefined,
       priority,
       notes,
       next_action: nextAction,
@@ -93,6 +109,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
         category,
         deadlineDate,
         deadlineToTime,
+        remindDate: remindDate.trim() ? remindDate.trim() : undefined,
+        remindTime: remindTime.trim() ? remindTime.trim() : undefined,
         priority,
         notes: notes.trim() ? notes.trim() : undefined,
         next_action: nextAction.trim() ? nextAction.trim() : undefined,
@@ -222,13 +240,154 @@ export const TaskModal: React.FC<TaskModalProps> = ({
             </div>
 
             <div>
-              <label className="form-label">Time (Optional)</label>
+              <label className="form-label">Deadline Time (Optional)</label>
               <input
                 type="time"
                 className="form-input"
                 value={deadlineToTime}
                 onChange={(e) => setDeadlineToTime(e.target.value)}
               />
+            </div>
+          </div>
+
+          {/* When to Remind (Custom Reminder Date & Time Option) */}
+          <div
+            style={{
+              marginBottom: 16,
+              padding: '12px 14px',
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: 10,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Bell size={14} color="#2563eb" />
+                <label className="form-label" style={{ marginBottom: 0, fontWeight: 700, color: '#1e293b' }}>
+                  When to Remind (Optional)
+                </label>
+              </div>
+              <span style={{ fontSize: 11, color: '#64748b' }}>
+                {remindDate ? 'Custom alert time active' : 'Auto 2-day / 1-day alerts'}
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 8 }}>
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 600, color: '#475569', display: 'block', marginBottom: 4 }}>
+                  Reminder Date
+                </label>
+                <input
+                  type="date"
+                  className="form-input"
+                  value={remindDate}
+                  onChange={(e) => setRemindDate(e.target.value)}
+                  style={{ backgroundColor: '#ffffff' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 600, color: '#475569', display: 'block', marginBottom: 4 }}>
+                  Reminder Time
+                </label>
+                <input
+                  type="time"
+                  className="form-input"
+                  value={remindTime}
+                  onChange={(e) => setRemindTime(e.target.value)}
+                  style={{ backgroundColor: '#ffffff' }}
+                />
+              </div>
+            </div>
+
+            {/* Quick Presets */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 11, color: '#64748b', marginRight: 2 }}>Quick set:</span>
+              <button
+                type="button"
+                onClick={() => {
+                  if (deadlineDate) {
+                    setRemindDate(deadlineDate);
+                    setRemindTime(deadlineToTime || '09:00');
+                  }
+                }}
+                style={{
+                  fontSize: 11,
+                  padding: '3px 8px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  color: '#334155',
+                }}
+              >
+                Same as Deadline
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (deadlineDate) {
+                    const d = new Date(deadlineDate);
+                    d.setDate(d.getDate() - 1);
+                    setRemindDate(formatDateForInput(d));
+                    setRemindTime('09:00');
+                  }
+                }}
+                style={{
+                  fontSize: 11,
+                  padding: '3px 8px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  color: '#334155',
+                }}
+              >
+                1 Day Before
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const now = new Date();
+                  now.setMinutes(now.getMinutes() + 5);
+                  setRemindDate(formatDateForInput(now));
+                  setRemindTime(formatTimeForInput(now));
+                }}
+                style={{
+                  fontSize: 11,
+                  padding: '3px 8px',
+                  backgroundColor: '#eff6ff',
+                  border: '1px solid #bfdbfe',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  color: '#2563eb',
+                  fontWeight: 600,
+                }}
+                title="Set reminder to 5 minutes from now to test"
+              >
+                In 5 Minutes (Test)
+              </button>
+              {(remindDate || remindTime) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRemindDate('');
+                    setRemindTime('');
+                  }}
+                  style={{
+                    fontSize: 11,
+                    padding: '3px 8px',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #fca5a5',
+                    borderRadius: 6,
+                    cursor: 'pointer',
+                    color: '#dc2626',
+                    marginLeft: 'auto',
+                  }}
+                >
+                  Clear
+                </button>
+              )}
             </div>
           </div>
 

@@ -5,6 +5,8 @@ export interface TaskInput {
   category: TaskCategory;
   deadlineDate: string; // YYYY-MM-DD
   deadlineToTime?: string; // HH:mm
+  remindDate?: string; // YYYY-MM-DD
+  remindTime?: string; // HH:mm
   priority: TaskPriority;
   notes?: string;
   next_action?: string;

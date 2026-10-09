@@ -21,6 +21,7 @@ export interface Task {
   notes: string | null;
   next_action?: string | null;
   destination_url?: string | null;
+  remind_at?: string | null; // Custom reminder time
   created_at: string;
   updated_at: string;
   completed_at: string | null;

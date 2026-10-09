@@ -11,7 +11,7 @@ export interface CalculatedReminder {
  * according to the TaskBuddy Reminder Policy.
  */
 export function calculateRemindersForTask(
-  task: Pick<Task, 'id' | 'deadline_at'>,
+  task: Pick<Task, 'id' | 'deadline_at'> & { remind_at?: string | null },
   settings: AppSettings,
   referenceNow = new Date()
 ): CalculatedReminder[] {
@@ -19,8 +19,18 @@ export function calculateRemindersForTask(
   const deadlineMs = deadline.getTime();
   const nowMs = referenceNow.getTime();
 
-  // If deadline is already in the past, no future regular reminders
   const results: CalculatedReminder[] = [];
+
+  // 0. Custom reminder time (if user explicitly set when to remind)
+  if (task.remind_at) {
+    const customTime = new Date(task.remind_at);
+    if (!isNaN(customTime.getTime())) {
+      results.push({
+        reminder_type: 'custom',
+        scheduled_at: customTime.toISOString(),
+      });
+    }
+  }
 
   // 1. Two days before (48 hours before deadline)
   if (settings.defaultReminderTwoDay) {

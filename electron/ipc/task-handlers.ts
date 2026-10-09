@@ -27,6 +27,15 @@ export function registerTaskHandlers(
       settings.defaultDeadlineTime
     );
 
+    let remindIso: string | null = null;
+    if (input.remindDate) {
+      remindIso = combineDateTime(
+        input.remindDate,
+        input.remindTime,
+        input.deadlineToTime || settings.defaultDeadlineTime
+      );
+    }
+
     const taskId = `task_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     const task = taskRepo.create({
       id: taskId,
@@ -37,6 +46,7 @@ export function registerTaskHandlers(
       notes: input.notes,
       next_action: input.next_action,
       destination_url: input.destination_url,
+      remind_at: remindIso,
     });
 
     scheduler.onTaskChanged(task);
@@ -60,6 +70,19 @@ export function registerTaskHandlers(
         );
       }
 
+      let newRemindIso: string | null | undefined = undefined;
+      if (updates.remindDate !== undefined) {
+        if (updates.remindDate) {
+          newRemindIso = combineDateTime(
+            updates.remindDate,
+            updates.remindTime,
+            updates.deadlineToTime || settings.defaultDeadlineTime
+          );
+        } else {
+          newRemindIso = null;
+        }
+      }
+
       const updated = taskRepo.update(id, {
         title: updates.title,
         category: updates.category,
@@ -68,6 +91,7 @@ export function registerTaskHandlers(
         notes: updates.notes,
         next_action: updates.next_action,
         destination_url: updates.destination_url,
+        ...(newRemindIso !== undefined ? { remind_at: newRemindIso } : {}),
       });
 
       if (updated) {

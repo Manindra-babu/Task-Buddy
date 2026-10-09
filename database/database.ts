@@ -158,6 +158,20 @@ export class TaskBuddyDatabase {
       ]);
     }
 
+    // Migration 3: Add remind_at to tasks
+    if (!appliedVersions.includes(3)) {
+      try {
+        this.db.run(`ALTER TABLE tasks ADD COLUMN remind_at TEXT;`);
+      } catch {
+        // column may already exist
+      }
+
+      this.run('INSERT INTO migrations (version, applied_at) VALUES (?, ?)', [
+        3,
+        new Date().toISOString(),
+      ]);
+    }
+
     this.persistImmediate();
   }
 

@@ -59,6 +59,9 @@ function setupBrowserMockIfNecessary() {
           priority: input.priority,
           status: 'pending',
           notes: input.notes || null,
+          next_action: input.next_action || null,
+          destination_url: input.destination_url || null,
+          remind_at: input.remindDate ? new Date(`${input.remindDate}T${input.remindTime || '09:00'}:00`).toISOString() : null,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           completed_at: null,
@@ -73,6 +76,11 @@ function setupBrowserMockIfNecessary() {
           if (updates.category) t.category = updates.category;
           if (updates.priority) t.priority = updates.priority;
           if (updates.notes !== undefined) t.notes = updates.notes || null;
+          if (updates.next_action !== undefined) t.next_action = updates.next_action || null;
+          if (updates.destination_url !== undefined) t.destination_url = updates.destination_url || null;
+          if (updates.remindDate !== undefined) {
+            t.remind_at = updates.remindDate ? new Date(`${updates.remindDate}T${updates.remindTime || '09:00'}:00`).toISOString() : null;
+          }
           return { success: true, task: t };
         }
         return { success: false, error: 'Not found' };
