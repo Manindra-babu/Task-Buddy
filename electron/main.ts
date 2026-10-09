@@ -12,6 +12,7 @@ import { registerTaskHandlers } from './ipc/task-handlers';
 import { registerReminderHandlers } from './ipc/reminder-handlers';
 import { registerSettingsHandlers } from './ipc/settings-handlers';
 import { StartupManager } from './startup';
+import { ReminderEventPayload } from '../src/shared/types';
 
 const isDev = (process.env.NODE_ENV === 'development' || process.env.ELECTRON_DEV === 'true') && !app.isPackaged;
 const devServerUrl = process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173/';
@@ -56,7 +57,13 @@ async function bootstrap() {
       windowManager.showCharacterWithoutFocus();
       const charWin = windowManager.getCharacterWindow();
       if (charWin && !charWin.isDestroyed()) {
-        charWin.webContents.send('reminder:due', payload);
+        if (charWin.webContents.isLoading()) {
+          charWin.webContents.once('did-finish-load', () => {
+            charWin.webContents.send('reminder:due', payload);
+          });
+        } else {
+          charWin.webContents.send('reminder:due', payload);
+        }
       }
 
       const settings = settingsRepo.getSettings();
@@ -87,10 +94,51 @@ async function bootstrap() {
 
   // Tray manager
   trayManager = new TrayManager(windowManager, scheduler, () => {
-    // Character preview from tray
-    const charWin = windowManager.createCharacterWindow();
+    const previewPayload: ReminderEventPayload = {
+      reminder: {
+        id: 'preview_reminder',
+        task_id: 'preview_task',
+        reminder_type: 'deadline_day',
+        scheduled_at: new Date().toISOString(),
+        status: 'scheduled',
+        delivered_at: null,
+        snoozed_until: null,
+        attempt_count: 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      task: {
+        id: 'preview_task',
+        title: 'Complete Hackathon Presentation',
+        category: 'hackathons',
+        deadline_at: new Date(Date.now() + 3600000 * 2).toISOString(),
+        priority: 'high',
+        status: 'pending',
+        notes: 'Final slide deck and live demo test.',
+        next_action: 'Finish the final demo and verify the submission.',
+        destination_url: 'https://devpost.com',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        completed_at: null,
+      },
+      message: 'Hackathon presentation is due in 2 hours! Finish the final demo and verify the submission.',
+      categoryLabel: 'Hackathons',
+      isOverdue: false,
+      remainingText: 'Due in 2 hours',
+      queueCount: 1,
+    };
+
     windowManager.showCharacterWithoutFocus();
-    charWin.webContents.send('character:previewEvent');
+    const charWin = windowManager.getCharacterWindow();
+    if (charWin && !charWin.isDestroyed()) {
+      if (charWin.webContents.isLoading()) {
+        charWin.webContents.once('did-finish-load', () => {
+          charWin.webContents.send('reminder:due', previewPayload);
+        });
+      } else {
+        charWin.webContents.send('reminder:due', previewPayload);
+      }
+    }
   });
   trayManager.init();
 
@@ -108,9 +156,10 @@ async function bootstrap() {
     StartupManager.configureStartup(true);
   }
 
-  // Windows Sleep / Wakeup handler
+  // Windows Sleep / Wakeup handler: reconcile and immediately check due reminders
   powerMonitor.on('resume', () => {
     scheduler.reconcile();
+    scheduler.checkDueReminders();
   });
 
   // Remove default application menu so no unwanted white menu strip appears
