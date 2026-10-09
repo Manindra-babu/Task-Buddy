@@ -1,0 +1,121 @@
+import { TaskBuddyDatabase } from './database';
+import { Task, TaskCategory, TaskPriority, TaskStatus } from '../src/shared/types';
+
+export class TaskRepository {
+  constructor(private db: TaskBuddyDatabase) {}
+
+  create(params: {
+    id: string;
+    title: string;
+    category: TaskCategory;
+    deadline_at: string;
+    priority: TaskPriority;
+    notes?: string | null;
+  }): Task {
+    const now = new Date().toISOString();
+    const task: Task = {
+      id: params.id,
+      title: params.title.trim(),
+      category: params.category,
+      deadline_at: params.deadline_at,
+      priority: params.priority,
+      status: 'pending',
+      notes: params.notes ? params.notes.trim() : null,
+      created_at: now,
+      updated_at: now,
+      completed_at: null,
+    };
+
+    this.db.run(
+      `INSERT INTO tasks (id, title, category, deadline_at, priority, status, notes, created_at, updated_at, completed_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        task.id,
+        task.title,
+        task.category,
+        task.deadline_at,
+        task.priority,
+        task.status,
+        task.notes,
+        task.created_at,
+        task.updated_at,
+        task.completed_at,
+      ]
+    );
+
+    return task;
+  }
+
+  getById(id: string): Task | null {
+    return this.db.get<Task>('SELECT * FROM tasks WHERE id = ?', [id]);
+  }
+
+  getAll(): Task[] {
+    return this.db.all<Task>('SELECT * FROM tasks ORDER BY deadline_at ASC');
+  }
+
+  getPending(): Task[] {
+    return this.db.all<Task>(
+      "SELECT * FROM tasks WHERE status = 'pending' ORDER BY deadline_at ASC"
+    );
+  }
+
+  update(
+    id: string,
+    updates: Partial<{
+      title: string;
+      category: TaskCategory;
+      deadline_at: string;
+      priority: TaskPriority;
+      notes: string | null;
+      status: TaskStatus;
+    }>
+  ): Task | null {
+    const current = this.getById(id);
+    if (!current) return null;
+
+    const now = new Date().toISOString();
+    const newTitle = updates.title !== undefined ? updates.title.trim() : current.title;
+    const newCategory = updates.category !== undefined ? updates.category : current.category;
+    const newDeadline = updates.deadline_at !== undefined ? updates.deadline_at : current.deadline_at;
+    const newPriority = updates.priority !== undefined ? updates.priority : current.priority;
+    const newNotes = updates.notes !== undefined ? (updates.notes ? updates.notes.trim() : null) : current.notes;
+    const newStatus = updates.status !== undefined ? updates.status : current.status;
+    const completedAt =
+      newStatus === 'completed' ? (current.completed_at || now) : null;
+
+    this.db.run(
+      `UPDATE tasks
+       SET title = ?, category = ?, deadline_at = ?, priority = ?, notes = ?, status = ?, completed_at = ?, updated_at = ?
+       WHERE id = ?`,
+      [
+        newTitle,
+        newCategory,
+        newDeadline,
+        newPriority,
+        newNotes,
+        newStatus,
+        completedAt,
+        now,
+        id,
+      ]
+    );
+
+    return this.getById(id);
+  }
+
+  complete(id: string): Task | null {
+    return this.update(id, { status: 'completed' });
+  }
+
+  reopen(id: string): Task | null {
+    return this.update(id, { status: 'pending' });
+  }
+
+  delete(id: string): boolean {
+    const existing = this.getById(id);
+    if (!existing) return false;
+    this.db.run('DELETE FROM tasks WHERE id = ?', [id]);
+    return true;
+  }
+}

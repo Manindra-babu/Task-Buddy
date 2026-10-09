@@ -1,0 +1,78 @@
+{
+  "name": "taskbuddy",
+  "version": "1.0.0",
+  "description": "TaskBuddy: Friendly 3D Desktop Deadline Companion for Windows",
+  "main": "dist/electron/electron/main.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "vite",
+    "build:renderer": "vite build",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "build": "npm run build:renderer && npm run build:electron",
+    "start": "electron .",
+    "dev:app": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "package": "npm run build && electron-builder --win"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.16.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "sql.js": "^1.12.0",
+    "three": "^0.174.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@types/sql.js": "^1.4.9",
+    "@types/three": "^0.174.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
+    "electron": "^35.1.2",
+    "electron-builder": "^25.1.8",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.1",
+    "vitest": "^3.0.8",
+    "wait-on": "^8.0.2"
+  },
+  "build": {
+    "appId": "com.taskbuddy.app",
+    "productName": "TaskBuddy",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "assets/**/*",
+      "node_modules/sql.js/dist/sql-wasm.wasm"
+    ],
+    "extraResources": [
+      {
+        "from": "assets",
+        "to": "assets",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "node_modules/sql.js/dist/sql-wasm.wasm",
+        "to": "sql-wasm.wasm"
+      }
+    ],
+    "win": {
+      "target": ["nsis", "zip"],
+      "sign": null,
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "TaskBuddy"
+    }
+  }
+}
