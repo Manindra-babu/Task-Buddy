@@ -16,10 +16,11 @@
     "build:electron": "tsc -p tsconfig.electron.json",
     "build": "npm run build:renderer && npm run build:electron",
     "start": "electron .",
-    "dev:app": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "dev:app": "npm run build:electron && concurrently -k \"vite\" \"wait-on http://localhost:5173 && cross-env ELECTRON_DEV=true electron .\"",
     "test": "vitest run",
     "test:watch": "vitest",
-    "package": "npm run build && electron-builder --win"
+    "package": "npm run build && electron-builder --win",
+    "package:dir": "npm run build && electron-builder --win --dir"
   },
   "dependencies": {
     "clsx": "^2.1.1",
